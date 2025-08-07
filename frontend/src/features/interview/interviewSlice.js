@@ -33,7 +33,8 @@ export const submitAnswer = createAsyncThunk(
   'interview/submit',
   async (answerData, thunkAPI) => {
     try {
-      return await interviewService.submitAnswer(answerData);
+      const response = await interviewService.submitAnswer(answerData);
+      return response;
     } catch (error) {
       const message =
         (error.response && error.response.data && error.response.data.message) ||
@@ -86,6 +87,7 @@ export const interviewSlice = createSlice({
         state.isSuccess = true;
         state.currentQuestion = action.payload.question;
         state.currentFeedback = null;
+        state.interviewHistory = [];
       })
       .addCase(startInterview.rejected, (state, action) => {
         state.isLoading = false;
@@ -94,11 +96,19 @@ export const interviewSlice = createSlice({
       })
       .addCase(submitAnswer.pending, (state) => {
         state.isLoading = true;
+        state.currentFeedback = null;
       })
       .addCase(submitAnswer.fulfilled, (state, action) => {
         state.isLoading = false;
         state.isSuccess = true;
         state.currentFeedback = action.payload.feedback;
+        state.currentQuestion = action.payload.nextQuestion;
+        if (state.currentQuestion) {
+            state.interviewHistory.push({
+                question: state.currentQuestion,
+                feedback: state.currentFeedback,
+            });
+        }
       })
       .addCase(submitAnswer.rejected, (state, action) => {
         state.isLoading = false;

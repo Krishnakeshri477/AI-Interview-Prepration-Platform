@@ -14,7 +14,7 @@ exports.register = async (req, res, next) => {
     }
 
     // Create user
-    const user = await User.create({ name, email, password : await bcrypt.hash(password, 10) });
+    const user = await User.create({ name, email, password });
 
     // Generate JWT
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
