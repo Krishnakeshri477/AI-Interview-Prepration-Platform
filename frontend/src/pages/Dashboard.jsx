@@ -1,13 +1,13 @@
 // frontend\src\pages\Dashboard.jsx
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, NavLink } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import { FaPlay, FaHistory, FaBook, FaChartLine, FaLightbulb, FaUserTie, FaMicrophone } from 'react-icons/fa';
 
 const Dashboard = () => {
-  
+
   const heroImageUrl = "https://images.unsplash.com/photo-1573497491765-dccce02b29df?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1887&q=80";
-  
+
   return (
     <>
       <Navbar />
@@ -29,16 +29,19 @@ const Dashboard = () => {
                 >
                   <FaPlay className="mr-2" /> Start Mock Interview
                 </Link>
-                <button className="flex items-center justify-center bg-white hover:bg-gray-100 text-gray-800 font-bold py-3 px-6 rounded-lg text-lg transition duration-300 border border-gray-300 shadow-sm hover:shadow-md">
+                <NavLink
+                  to="/speaking-tips"
+                  onClick={() => window.scrollTo(0, 0)}
+                  className="flex items-center justify-center bg-white hover:bg-gray-100 text-gray-800 font-bold py-3 px-6 rounded-lg text-lg transition duration-300 border border-gray-300 shadow-sm hover:shadow-md">
                   <FaMicrophone className="mr-2 text-blue-500" /> Speaking Tips
-                </button>
+                </NavLink>
               </div>
             </div>
             <div className="lg:w-1/2">
               <div className="relative rounded-xl overflow-hidden shadow-2xl aspect-video">
-                <img 
-                  src={heroImageUrl} 
-                  alt="AI Interview Practice" 
+                <img
+                  src={heroImageUrl}
+                  alt="AI Interview Practice"
                   className="w-full h-full object-cover"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-black/20 flex items-end p-6">
@@ -62,7 +65,7 @@ const Dashboard = () => {
                 Tailored questions for tech, business, healthcare, and more based on real job requirements.
               </p>
             </div>
-            
+
             <div className="bg-white p-6 rounded-xl shadow-lg border-t-4 border-purple-500 hover:shadow-xl transition-all">
               <div className="text-purple-500 text-2xl mb-4">
                 <FaLightbulb />
@@ -72,7 +75,7 @@ const Dashboard = () => {
                 Our AI analyzes your answers for content, clarity, and confidence with actionable suggestions.
               </p>
             </div>
-            
+
             <div className="bg-white p-6 rounded-xl shadow-lg border-t-4 border-green-500 hover:shadow-xl transition-all">
               <div className="text-green-500 text-2xl mb-4">
                 <FaChartLine />
@@ -123,12 +126,13 @@ const Dashboard = () => {
               <p className="text-gray-600 mb-6">
                 Learn proven strategies to ace technical and behavioral interviews.
               </p>
-              <button
-                onClick={() => alert('Interview guide coming soon!')}
+              <NavLink
+                to="/guide"
+                onClick={() => window.scrollTo(0, 0)}
                 className="inline-block bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-lg text-lg transition duration-300"
               >
                 Explore Guide
-              </button>
+              </NavLink>
             </div>
           </div>
         </div>
