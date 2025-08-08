@@ -1,7 +1,8 @@
 // frontend\src\pages\Auth.jsx
 import AuthForm from '../components/AuthForm';
 import { useState } from 'react';
-import { FaUser, FaLock, FaEnvelope, FaGoogle, FaGithub, FaFacebook } from 'react-icons/fa';
+import { FaUser, FaLock, FaEnvelope, FaGoogle, FaGithub } from 'react-icons/fa';
+import api from '../utils/api';
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -80,19 +81,15 @@ const Auth = () => {
           </div>
 
           {/* Social login */}
-          <div className="grid grid-cols-3 gap-3 mb-6">
-            <button className="flex items-center justify-center py-2 px-4 border border-gray-300 rounded-lg hover:bg-gray-50 transition">
+          <div className="grid grid-cols-2 gap-3 mb-6">
+            <a href={`${api.defaults.baseURL.replace('/api','')}/api/auth/google`} className="flex items-center justify-center py-2 px-4 border border-gray-300 rounded-lg hover:bg-gray-50 transition">
               <FaGoogle className="text-red-500 mr-2" />
               <span className="text-sm font-medium hidden sm:inline">Google</span>
-            </button>
-            <button className="flex items-center justify-center py-2 px-4 border border-gray-300 rounded-lg hover:bg-gray-50 transition">
+            </a>
+            <a href={`${api.defaults.baseURL.replace('/api','')}/api/auth/github`} className="flex items-center justify-center py-2 px-4 border border-gray-300 rounded-lg hover:bg-gray-50 transition">
               <FaGithub className="text-gray-800 mr-2" />
               <span className="text-sm font-medium hidden sm:inline">GitHub</span>
-            </button>
-            <button className="flex items-center justify-center py-2 px-4 border border-gray-300 rounded-lg hover:bg-gray-50 transition">
-              <FaFacebook className="text-blue-600 mr-2" />
-              <span className="text-sm font-medium hidden sm:inline">Facebook</span>
-            </button>
+            </a>
           </div>
 
           {/* Footer link */}
