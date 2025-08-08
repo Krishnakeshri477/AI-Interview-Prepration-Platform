@@ -5,6 +5,7 @@ import interviewService from './interviewService';
 const initialState = {
   currentQuestion: null,
   currentFeedback: null,
+  interviewId: null,
   interviewHistory: [],
   isLoading: false,
   isSuccess: false,
@@ -45,6 +46,23 @@ export const submitAnswer = createAsyncThunk(
   }
 );
 
+// Submit an audio answer (multipart)
+export const submitAudioAnswer = createAsyncThunk(
+  'interview/submitAudio',
+  async (formData, thunkAPI) => {
+    try {
+      const response = await interviewService.submitAudioAnswer(formData);
+      return response;
+    } catch (error) {
+      const message =
+        (error.response && error.response.data && error.response.data.message) ||
+        error.message ||
+        error.toString();
+      return thunkAPI.rejectWithValue(message);
+    }
+  }
+);
+
 // Get interview history
 export const getInterviewHistory = createAsyncThunk(
   'interview/getHistory',
@@ -68,6 +86,7 @@ export const interviewSlice = createSlice({
     resetInterviewState: (state) => {
       state.currentQuestion = null;
       state.currentFeedback = null;
+      state.interviewId = null;
       state.isLoading = false;
       state.isSuccess = false;
       state.isError = false;
@@ -88,6 +107,7 @@ export const interviewSlice = createSlice({
         state.currentQuestion = action.payload.question;
         state.currentFeedback = null;
         state.interviewHistory = [];
+        state.interviewId = action.payload.interviewId;
       })
       .addCase(startInterview.rejected, (state, action) => {
         state.isLoading = false;
@@ -102,7 +122,7 @@ export const interviewSlice = createSlice({
         state.isLoading = false;
         state.isSuccess = true;
         state.currentFeedback = action.payload.feedback;
-        state.currentQuestion = action.payload.nextQuestion;
+        // Keep the current question - don't expect nextQuestion from backend
         if (state.currentQuestion) {
             state.interviewHistory.push({
                 question: state.currentQuestion,
@@ -124,6 +144,27 @@ export const interviewSlice = createSlice({
         state.interviewHistory = action.payload.data;
       })
       .addCase(getInterviewHistory.rejected, (state, action) => {
+        state.isLoading = false;
+        state.isError = true;
+        state.message = action.payload;
+      })
+      // Audio submit reducers
+      .addCase(submitAudioAnswer.pending, (state) => {
+        state.isLoading = true;
+        state.currentFeedback = null;
+      })
+      .addCase(submitAudioAnswer.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.isSuccess = true;
+        state.currentFeedback = action.payload.feedback;
+        if (state.currentQuestion) {
+          state.interviewHistory.push({
+            question: state.currentQuestion,
+            feedback: state.currentFeedback,
+          });
+        }
+      })
+      .addCase(submitAudioAnswer.rejected, (state, action) => {
         state.isLoading = false;
         state.isError = true;
         state.message = action.payload;

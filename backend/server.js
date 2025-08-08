@@ -17,5 +17,5 @@ app.use('/api/interview', require('./src/routes/apiRoutes'));
 
 app.use(errorHandler);
 
-const PORT = process.env.PORT;
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

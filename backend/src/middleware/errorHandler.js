@@ -44,10 +44,10 @@ const errorHandler = (err, req, res, next) => {
     }
 
     // Default to 500 server error if no specific error caught
-    // res.status(error.statusCode || 500).json({
-    //     success: false,
-    //     error: error.message || 'Server Error'
-    // });
+    res.status(error.statusCode || 500).json({
+        success: false,
+        message: error.message || 'Server Error'
+    });
 };
 
 module.exports = { errorHandler, ErrorResponse };

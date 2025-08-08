@@ -1,7 +1,7 @@
 // frontend\src\pages\Interview.jsx
 import React, { useState, useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { startInterview, submitAnswer, resetInterviewState } from '../features/interview/interviewSlice';
+import { startInterview, submitAnswer, submitAudioAnswer } from '../features/interview/interviewSlice';
 import LoadingSpinner from '../components/LoadingSpinner';
 import useAudioPlayer from '../hooks/useAudioPlayer';
 import Navbar from '../components/Navbar';
@@ -11,7 +11,7 @@ import { GiArtificialIntelligence } from 'react-icons/gi';
 
 const Interview = () => {
   const dispatch = useDispatch();
-  const { currentQuestion, currentFeedback, isLoading, isError, message } = useSelector(
+  const { currentQuestion, currentFeedback, interviewId, isLoading, isError, message } = useSelector(
     (state) => state.interview
   );
 
@@ -28,26 +28,33 @@ const Interview = () => {
     if (isError) {
       alert(message);
     }
-
-    return () => {
-      dispatch(resetInterviewState());
-      stopAudio();
-    };
-  }, [isError, message, dispatch, stopAudio]);
+  }, [isError, message]);
 
   const handleStartInterview = () => {
     dispatch(startInterview({ role, difficulty }));
     setUserAnswer('');
     stopAudio();
     setExpandedFeedback(false);
-  };
+  }; 
 
   const handleTextAnswerSubmit = () => {
+    
     if (!currentQuestion || !userAnswer.trim()) {
       alert('Please provide an answer.');
       return;
     }
-    dispatch(submitAnswer({ question: currentQuestion, answer: userAnswer, role, difficulty }));
+    
+    if (!interviewId) {
+      alert('Interview ID is missing. Please start a new interview.');
+      return;
+    }
+    dispatch(submitAnswer({ 
+      interviewId, 
+      question: currentQuestion, 
+      answer: userAnswer, 
+      role, 
+      difficulty 
+    }));
     setExpandedFeedback(true);
   };
 
@@ -63,15 +70,17 @@ const Interview = () => {
 
       mediaRecorderRef.current.onstop = async () => {
         const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
-        const audioUrl = URL.createObjectURL(audioBlob);
-        console.log('Audio recorded:', audioUrl);
-        alert("Audio recording finished. In a real app, this would be uploaded to storage and then processed by AssemblyAI.");
-        dispatch(submitAnswer({
-          question: currentQuestion,
-          audioUrl: audioUrl,
-          role,
-          difficulty
-        }));
+        console.log('Audio recorded, size:', audioBlob.size);
+        
+        const formData = new FormData();
+        formData.append('audio', audioBlob, 'recording.webm');
+        formData.append('interviewId', interviewId);
+        formData.append('question', currentQuestion);
+        formData.append('role', role);
+        formData.append('difficulty', difficulty);
+        
+        // Dispatch audio answer thunk
+        dispatch(submitAudioAnswer(formData));
         setExpandedFeedback(true);
       };
 
@@ -99,6 +108,16 @@ const Interview = () => {
         playAudio(currentFeedback.audioFeedbackUrl);
       }
     }
+  };
+
+  const isValidAudioUrl = (url) => {
+    if (!url) return false;
+    // Check if URL is not a mock URL and has a valid audio extension
+    if (url.includes('mock') || url.includes('example.com')) {
+      return false;
+    }
+    const audioExtensions = ['.mp3', '.wav', '.ogg', '.m4a', '.webm'];
+    return audioExtensions.some(ext => url.toLowerCase().includes(ext));
   };
 
   const renderStars = (score) => {
@@ -286,7 +305,7 @@ const Interview = () => {
                   </div>
                 </div>
 
-                {currentFeedback.audioFeedbackUrl && (
+                {currentFeedback.audioFeedbackUrl && isValidAudioUrl(currentFeedback.audioFeedbackUrl) && (
                   <div className="mt-4 text-center">
                     <button
                       onClick={handlePlayFeedback}
