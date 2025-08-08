@@ -5,7 +5,7 @@ import { startInterview, submitAnswer, submitAudioAnswer } from '../features/int
 import LoadingSpinner from '../components/LoadingSpinner';
 import useAudioPlayer from '../hooks/useAudioPlayer';
 import Navbar from '../components/Navbar';
-import { FaMicrophone, FaStop, FaPlay, FaPause, FaStar, FaCode, FaComments,FaChevronDown,FaChevronUp} from 'react-icons/fa';
+import { FaMicrophone, FaStop, FaPlay, FaPause, FaStar, FaCode, FaComments, FaChevronDown, FaChevronUp, FaVolumeUp, FaStopCircle } from 'react-icons/fa';
 import { IoMdSend } from 'react-icons/io';
 import { GiArtificialIntelligence } from 'react-icons/gi';
 
@@ -23,6 +23,55 @@ const Interview = () => {
   const mediaRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
   const { isPlaying, playAudio, pauseAudio, stopAudio, currentAudioUrl } = useAudioPlayer();
+  const [isSpeaking, setIsSpeaking] = useState(false);
+  const voicesRef = useRef([]);
+
+  // Initialize and cache voices for SpeechSynthesis
+  useEffect(() => {
+    if (!('speechSynthesis' in window)) return;
+    const loadVoices = () => {
+      voicesRef.current = window.speechSynthesis.getVoices();
+    };
+    loadVoices();
+    window.speechSynthesis.onvoiceschanged = loadVoices;
+    return () => {
+      window.speechSynthesis.onvoiceschanged = null;
+    };
+  }, []);
+
+  const getDesiredVoice = () => {
+    const voices = voicesRef.current || [];
+    const voice = voices.find(v => v.name === 'Google.UK.English.Female');
+    if (voice) return voice;
+  };
+
+  const speakText = (text) => {
+    if (!text || !('speechSynthesis' in window)) return;
+    try {
+      // Stop any current media/audio
+      stopAudio();
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      const voice = getDesiredVoice();
+      if (voice) utterance.voice = voice;
+      utterance.lang = 'en-GB';
+      utterance.rate = 1;
+      utterance.pitch = 1;
+      utterance.onend = () => setIsSpeaking(false);
+      utterance.onerror = () => setIsSpeaking(false);
+      window.speechSynthesis.speak(utterance);
+      setIsSpeaking(true);
+    } catch {
+      // Fail silently
+      setIsSpeaking(false);
+    }
+  };
+
+  const stopSpeaking = () => {
+    if (!('speechSynthesis' in window)) return;
+    window.speechSynthesis.cancel();
+    setIsSpeaking(false);
+  };
 
   useEffect(() => {
     if (isError) {
@@ -204,6 +253,23 @@ const Interview = () => {
             <p className="text-lg text-gray-800 mb-6 bg-white p-4 rounded-lg border border-gray-200">
               {currentQuestion}
             </p>
+            <div className="flex items-center gap-3 mb-6">
+              {!isSpeaking ? (
+                <button
+                  onClick={() => speakText(currentQuestion)}
+                  className="inline-flex items-center px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-semibold transition"
+                >
+                  <FaVolumeUp className="mr-2" /> Speak Question
+                </button>
+              ) : (
+                <button
+                  onClick={stopSpeaking}
+                  className="inline-flex items-center px-4 py-2 rounded-lg bg-gray-600 hover:bg-gray-700 text-white font-semibold transition"
+                >
+                  <FaStopCircle className="mr-2" /> Stop Speaking
+                </button>
+              )}
+            </div>
 
             <div className="mb-6">
               <label htmlFor="userAnswer" className="block text-gray-700 text-sm font-semibold mb-2">
