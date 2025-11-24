@@ -22,7 +22,7 @@ app.use('/api/interview', require('./src/routes/apiRoutes'));
 
 app.use(errorHandler);
 
-app.get('*', (req, res) => {
+app.get('*name', (req, res) => {
   res.sendFile(path.join(__dirname, 'public/index.html'));
 });
 
