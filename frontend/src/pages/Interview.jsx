@@ -84,25 +84,32 @@ const Interview = () => {
     setUserAnswer('');
     stopAudio();
     setExpandedFeedback(false);
-  }; 
+  };
+
+  const handleNextQuestion = () => {
+    dispatch(startInterview({ role, difficulty }));
+    setUserAnswer('');
+    stopAudio();
+    setExpandedFeedback(false);
+  };
 
   const handleTextAnswerSubmit = () => {
-    
+
     if (!currentQuestion || !userAnswer.trim()) {
       alert('Please provide an answer.');
       return;
     }
-    
+
     if (!interviewId) {
       alert('Interview ID is missing. Please start a new interview.');
       return;
     }
-    dispatch(submitAnswer({ 
-      interviewId, 
-      question: currentQuestion, 
-      answer: userAnswer, 
-      role, 
-      difficulty 
+    dispatch(submitAnswer({
+      interviewId,
+      question: currentQuestion,
+      answer: userAnswer,
+      role,
+      difficulty
     }));
     setExpandedFeedback(true);
   };
@@ -120,14 +127,14 @@ const Interview = () => {
       mediaRecorderRef.current.onstop = async () => {
         const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
         console.log('Audio recorded, size:', audioBlob.size);
-        
+
         const formData = new FormData();
         formData.append('audio', audioBlob, 'recording.webm');
         formData.append('interviewId', interviewId);
         formData.append('question', currentQuestion);
         formData.append('role', role);
         formData.append('difficulty', difficulty);
-        
+
         // Dispatch audio answer thunk
         dispatch(submitAudioAnswer(formData));
         setExpandedFeedback(true);
@@ -174,9 +181,9 @@ const Interview = () => {
     const filledStars = Math.round(score / 20);
     for (let i = 1; i <= 5; i++) {
       stars.push(
-        <FaStar 
-          key={i} 
-          className={`${i <= filledStars ? "text-yellow-400" : "text-gray-300"} text-lg`} 
+        <FaStar
+          key={i}
+          className={`${i <= filledStars ? "text-yellow-400" : "text-gray-300"} text-lg`}
         />
       );
     }
@@ -247,9 +254,12 @@ const Interview = () => {
 
         {currentQuestion && (
           <div className="mt-8 bg-blue-50 p-6 rounded-xl shadow-inner border border-blue-100">
-            <h2 className="text-2xl font-semibold text-blue-800 mb-4 flex items-center">
-              <FaCode className="mr-2" /> Question:
-            </h2>
+            <div className="flex justify-between items-center">
+              <h2 className="flex items-center text-2xl font-semibold text-blue-800"><FaCode className="mr-2 text-blue-600" />Question:</h2>
+              <button onClick={handleNextQuestion} className="mb-4 inline-flex items-center px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold transition">
+                Next Question
+              </button>
+            </div>
             <p className="text-lg text-gray-800 mb-6 bg-white p-4 rounded-lg border border-gray-200">
               {currentQuestion}
             </p>
