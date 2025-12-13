@@ -2,7 +2,7 @@
 const { gemini } = require('../config/aiConfig');
 
 exports.generateQuestion = async (role, difficulty) => {
-  const prompt = `Generate a ${difficulty} interview question for a ${role} role.`;
+  const prompt = `Generate a ${difficulty} interview question for a ${role} role.Return ONLY the question text and nothing else.`;
   const result = await gemini.generateContent(prompt);
   const response = result.response;
   return response.text();
