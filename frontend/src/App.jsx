@@ -1,6 +1,7 @@
 // frontend\src\App.jsx
 import { Routes, Route, Navigate } from 'react-router-dom';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
+import { setToken } from './features/auth/authSlice';
 import Auth from './pages/Auth';
 import Dashboard from './pages/Dashboard';
 import Interview from './pages/Interview';
@@ -11,16 +12,19 @@ import SpeakingTips from './pages/SpeakingTips';
 
 function App() {
   const { user } = useSelector((state) => state.auth);
+  const dispatch = useDispatch();
+
   useEffect(() => {
     // Read token from oauth-success redirect
     const params = new URLSearchParams(window.location.search);
     const token = params.get('token');
     if (token) {
       localStorage.setItem('token', token);
+      dispatch(setToken());
       window.history.replaceState({}, document.title, window.location.pathname);
     }
-  }, []);
-  
+  }, [dispatch]);
+
   return (
     <div className="min-h-screen bg-gray-100 font-sans antialiased">
       <main>
